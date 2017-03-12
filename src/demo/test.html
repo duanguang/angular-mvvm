@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    function $scope() {
+        this.$$watchList=[];
+    }
+    $scope.prototype.$watch=function (name,getNewValue,listener) {
+        var watch={
+            name:name,
+            getNewValue:getNewValue,
+            listener:listener
+        };
+        this.$$watchList.push(watch);
+    }
+    $scope.prototype.$digestOnce=function () {
+        var dirty;
+        var list=this.$$watchList;
+        for(var i=0;i<this.$$watchList.length;i++){
+            //list[i].listener();
+            var watch = list[i];
+            var newValue = watch.getNewValue(this);
+            // 在第一次渲染界面,进行一个数据呈现.
+            var oldValue = watch.last;
+            if(newValue!=oldValue){
+                watch.listener(newValue,oldValue);
+                dirty = true;
+            }
+            watch.last = newValue;
+        }
+        return dirty;
+    }
+
+    $scope.prototype.$digest= function() {
+        var dirty = true;
+        while(dirty) {
+            dirty = this.$digestOnce();
+        }
+    };
+
+    var scope=new $scope();
+    scope.hello = 10;
+    scope.first=20;
+    scope.$watch('hello',function (scope) {
+        // 注意，要理解这里的this ，这个函数实际是  var newValue = watch.getNewValue(this);
+        // 这样调用，那么 this 就指的是当前监听器watch，所以可以得到name
+        return scope[this.name]
+    },function (newValue, oldValue) {
+        console.log('newValue:' + newValue + '~~~~' + 'oldValue:' + oldValue);
+    })
+
+    scope.$watch('first',function (scope) {
+        return scope[this.name];
+    },function (newValue,oldValue) {
+        scope.hello=25;
+        console.log('newValue:' + newValue + '~~~~' + 'oldValue:' + oldValue);
+    })
+    scope.$digest();
+    console.log(scope.hello);
+    console.log(scope.first)
+</script>
+</body>
+</html>

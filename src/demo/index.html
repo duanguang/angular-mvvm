@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../public/js/angular.min.js"></script>
+</head>
+<body>
+<div ng-app="app">
+    <div ng-controller="appController">
+        <span>{{data}}</span>
+        <button myclick>click</button>
+    </div>
+</div>
+<script>
+    var app = angular.module('app', []);
+    app.directive('myclick', function() {
+        return function(scope, element, attr) {
+            element.on('click', function() {
+                scope.data++;
+                console.log(scope.data)
+
+            })
+        }
+    })
+    app.controller('appController', function($scope) {
+        $scope.data = 0;
+    });
+</script>
+</body>
+</html>
